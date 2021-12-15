@@ -181,11 +181,10 @@ public class StockServiceImpl implements StockService {
 			
 			tblStockBasisLt.parallelStream().forEach(stockBasis -> {
 				try {
-
-					double sma5 = stockDao.findSma(stockBasis.getStockNo(), 5);
-					double sma10 = stockDao.findSma(stockBasis.getStockNo(), 10);
-					double sma20 = stockDao.findSma(stockBasis.getStockNo(), 20);
-					double sma60 = stockDao.findSma(stockBasis.getStockNo(), 60);
+					double sma5 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 5);
+					double sma10 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 10);
+					double sma20 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 20);
+					double sma60 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 60);
 					stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, 0, 0);
 				} catch (Exception e) {
 					logger.error("stockNo: {}, occur error: {}", stockBasis.getStockNo(), e.getMessage());

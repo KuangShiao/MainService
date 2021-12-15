@@ -19,7 +19,7 @@ public interface StockDao {
 
 	public List<StockInfo> findStockInfo(String stockNoName, String industryNo) throws Exception;
 	
-	public double findSma(String stockNo, int sma) throws Exception;
+	public double findSma(String stockNo, Timestamp openDt, int sma) throws Exception;
 	
 	public void updateSma(String stockNo, Timestamp openDt, double sma5, double sma10, double sma20, double sma60, double sma120, double sma240) throws Exception;
 

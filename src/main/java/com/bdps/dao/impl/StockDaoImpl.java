@@ -48,11 +48,11 @@ public class StockDaoImpl implements StockDao {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("select stockNo, stockName, listingDate, marketNo, industryNo       ").append(System.lineSeparator())
-		   .append(" from tblStockBasis t                                              ").append(System.lineSeparator())
+		   .append("  from tblStockBasis t                                             ").append(System.lineSeparator())
 		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator());
 //		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
 //	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
-//		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20211207' ").append(System.lineSeparator())
+//		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20211215' ").append(System.lineSeparator())
 //		   .append("                      and t.stockNo = stockNo)                     ").append(System.lineSeparator());
 //		   .append("                      and volume <> 0)                             ").append(System.lineSeparator());
 		
@@ -152,7 +152,7 @@ public class StockDaoImpl implements StockDao {
 	}
 	
 	@Override
-	public double findSma(String stockNo, int sma) throws Exception {
+	public double findSma(String stockNo, Timestamp openDt, int sma) throws Exception {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("select nvl(sum(closePrice), 0) / :sma   ").append(System.lineSeparator())
@@ -160,12 +160,14 @@ public class StockDaoImpl implements StockDao {
 		   .append("         select closePrice              ").append(System.lineSeparator())
 		   .append("           from tblStockPrice           ").append(System.lineSeparator())
 		   .append("          where stockNo = :stockNo      ").append(System.lineSeparator())
+		   .append("            and openDt <= :openDt       ").append(System.lineSeparator())
 		   .append("            and rownum <= :sma          ").append(System.lineSeparator())
 		   .append("          order by opendt desc          ").append(System.lineSeparator())
 		   .append("        )                               ").append(System.lineSeparator());
 		
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("stockNo", stockNo);
+		paramMap.put("openDt", openDt);
 		paramMap.put("sma", sma);
 		
 		logger.info("findSma sql: {}, paramMap: {}", sql, paramMap);
