@@ -148,5 +148,32 @@ public class StockController {
 
 		return vo;
 	}
+	
+	@RequestMapping(value = "/updateBuyAndSell", produces = "application/json", method = RequestMethod.GET)
+	public Vo updateBuyAndSell(@RequestParam("dt") String dt) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== updateBuyAndSell ==========");
+		try {  
+
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyyMMdd");
+			DateTime openDt = dtf.parseDateTime(dt);
+			openDt = openDt.plusHours(15);
+			stockService.updateBuyAndSell(openDt);
+			
+			DateTimeFormatter dtfOut  = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
+			logger.info("openDt: {}", dtfOut.print(openDt));
+
+			vo.setCheck(true);
+			vo.setData(dtfOut.print(openDt));
+		} catch (Exception e) {
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("[E]========== updateBuyAndSell ==========");
+		
+		return vo;
+	}
 
 }

@@ -20,5 +20,7 @@ public interface StockService {
 	public List<StockInfo> findStockInfo(String stockNoName, String industryNo) throws Exception;
 
 	public void updateSma(DateTime openDt) throws Exception;
+	
+	public void updateBuyAndSell(DateTime openDt) throws Exception;
 
 }

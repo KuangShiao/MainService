@@ -7,6 +7,8 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.bdps.dao.StockDao;
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockBasis;
+import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
 import com.bdps.service.HttpService;
 import com.bdps.service.StockService;
@@ -188,10 +195,155 @@ public class StockServiceImpl implements StockService {
 					stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, 0, 0);
 				} catch (Exception e) {
 					logger.error("stockNo: {}, occur error: {}", stockBasis.getStockNo(), e.getMessage());
+					try {
+						double sma5 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 5);
+						double sma10 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 10);
+						double sma20 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 20);
+						double sma60 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 60);
+						stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, 0, 0);
+					} catch (Exception e1) {
+						
+					}
 				}
 			});
 
 		}
+	}
+	
+	@Override
+	public void updateBuyAndSell(DateTime openDt) throws Exception {
+		
+		// [外資]
+		List<TblStockPrice> list = new ArrayList<>();
+		TblStockPrice tsp = null;
+		int i = 0;
+		String url = "https://fubon-ebrokerdj.fbs.com.tw/Z/ZE/ZEE/ZEE.djhtm";
+		
+        Document document = Jsoup.connect(url).validateTLSCertificates(false).get();
+        Elements links = document.getElementsByClass("t01").select("tr td");
+        for (Element link : links) {
+            
+        	
+        	if (i % 4 == 1) {
+        		String val = link.select("a").attr("href").toString();
+        		if (!"".equals(val)) {
+        			String stockNo = val.replace("javascript:Link2Stk('", "").replace("')", "");
+        			tsp = new TblStockPrice();
+        			tsp.setStockNo(stockNo);
+        		}
+        	}
+        	else if (i % 4 == 2) {
+        		try {
+        			tsp.setForeignInvestors(NumberFormat.getIntegerInstance().parse(link.text()).intValue());
+        			list.add(tsp);
+        		} catch (Exception e) {
+        			
+        		}
+        	}
+        	i++;
+        }
+        
+        for (TblStockPrice t: list) {
+        	try {
+        		stockDao.updateForeignInvestors(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getForeignInvestors());	
+        	} catch (Exception e) {
+        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
+        	}
+        	
+        }
+        
+        
+        //[投信]
+		list = new ArrayList<>();
+		tsp = null;
+		i = 0;
+		url = "https://fubon-ebrokerdj.fbs.com.tw/Z/ZE/ZES/ZES.djhtm";
+		
+        document = Jsoup.connect(url).validateTLSCertificates(false).get();
+        links = document.getElementsByClass("t01").select("tr td");
+        for (Element link : links) {
+            
+        	if (i % 4 == 1) {
+        		String val = link.select("a").attr("href").toString();
+        		if (!"".equals(val)) {
+        			String stockNo = val.replace("javascript:Link2Stk('", "").replace("')", "");
+        			tsp = new TblStockPrice();	
+        			tsp.setStockNo(stockNo);
+        		}
+        	}
+        	else if (i % 4 == 0) {
+        		try {
+        			tsp.setInvestmentTrust(NumberFormat.getIntegerInstance().parse(link.text()).intValue());
+        			list.add(tsp);	
+        		} catch (Exception e) {
+        			
+        		}
+        	}
+        	i++;
+        }
+        
+        for (TblStockPrice t: list) {
+        	try {
+        		stockDao.updateInvestmentTrust(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getInvestmentTrust());	
+        	} catch (Exception e) {
+        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
+        	}
+        }
+        
+        // [自營商]
+		list = new ArrayList<>();
+		tsp = null;
+		i = 0;
+		url = "https://fubon-ebrokerdj.fbs.com.tw/Z/ZE/ZEF/ZEF.djhtm";
+		
+        document = Jsoup.connect(url).validateTLSCertificates(false).get();
+        links = document.getElementsByClass("t01").select("tr td");
+        for (Element link : links) {
+            
+        	if (i % 4 == 1) {
+        		String val = link.select("a").attr("href").toString();
+        		if (!"".equals(val)) {
+        			String stockNo = val.replace("javascript:Link2Stk('", "").replace("')", "");
+        			tsp = new TblStockPrice();	
+        			tsp.setStockNo(stockNo.replace("AP", ""));
+        		}
+        		else {
+        			try {
+    	        		String temp = link.select("script").get(0).toString().replace("<script language=\"javascript\">\r\n" + 
+    	        				"<!--\r\n" + 
+    	        				"	GenLink2stk('", "");
+    	        		int end = temp.indexOf("','");
+    	        		String v = temp.substring(0, end);
+    	        		if (!"".equals(v)) {
+    	        			String stockNo = v.replace("javascript:Link2Stk('", "").replace("')", "");
+    	        			tsp = new TblStockPrice();	
+    	        			tsp.setStockNo(stockNo.replace("AS", ""));
+    	        		}
+        			} catch (Exception e) {
+            			
+            		}
+        		}
+        	}
+        	else if (i % 4 == 0) {
+        		try {
+        			tsp.setDealer(NumberFormat.getIntegerInstance().parse(link.text()).intValue());
+        			list.add(tsp);	
+        		} catch (Exception e) {
+        			
+        		}
+        	}
+        	i++;
+        }
+        
+        for (TblStockPrice t: list) {
+        	try {
+        		stockDao.updateDealer(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getDealer());	
+        	} catch (Exception e) {
+        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
+        	}
+        }
+        
+        
 	}
 
 }

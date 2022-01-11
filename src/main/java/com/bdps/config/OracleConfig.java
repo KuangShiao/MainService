@@ -25,7 +25,7 @@ public class OracleConfig {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("oracle.jdbc.OracleDriver");
 //        dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:orcl");
-        dataSource.setUrl("jdbc:oracle:thin:@52.255.137.177:1521:cdb1");
+        dataSource.setUrl("jdbc:oracle:thin:@23.101.125.217:1521:cdb1");
         dataSource.setUsername("BDPS");
         dataSource.setPassword("ChuKuang");        
         

@@ -22,5 +22,11 @@ public interface StockDao {
 	public double findSma(String stockNo, Timestamp openDt, int sma) throws Exception;
 	
 	public void updateSma(String stockNo, Timestamp openDt, double sma5, double sma10, double sma20, double sma60, double sma120, double sma240) throws Exception;
+	
+	public void updateForeignInvestors(String stockNo, Timestamp openDt, int foreignInvestors) throws Exception;
+	
+	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception;
+	
+	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception;
 
 }

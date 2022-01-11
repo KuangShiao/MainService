@@ -17,6 +17,9 @@ public class TblStockPrice {
 	private double sma60;
 	private double sma120;
 	private double sma240;
+	private int foreignInvestors;
+	private int investmentTrust;
+	private int dealer;
 	private Timestamp createDate;
 	private Timestamp modifyDate;
 
@@ -122,6 +125,30 @@ public class TblStockPrice {
 
 	public void setSma240(double sma240) {
 		this.sma240 = sma240;
+	}	
+
+	public int getForeignInvestors() {
+		return foreignInvestors;
+	}
+
+	public void setForeignInvestors(int foreignInvestors) {
+		this.foreignInvestors = foreignInvestors;
+	}
+
+	public int getInvestmentTrust() {
+		return investmentTrust;
+	}
+
+	public void setInvestmentTrust(int investmentTrust) {
+		this.investmentTrust = investmentTrust;
+	}
+
+	public int getDealer() {
+		return dealer;
+	}
+
+	public void setDealer(int dealer) {
+		this.dealer = dealer;
 	}
 
 	public Timestamp getCreateDate() {

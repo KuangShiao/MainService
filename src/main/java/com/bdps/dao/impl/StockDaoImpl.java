@@ -49,12 +49,12 @@ public class StockDaoImpl implements StockDao {
 		StringBuilder sql = new StringBuilder();
 		sql.append("select stockNo, stockName, listingDate, marketNo, industryNo       ").append(System.lineSeparator())
 		   .append("  from tblStockBasis t                                             ").append(System.lineSeparator())
-		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator());
-//		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
-//	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
-//		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20211215' ").append(System.lineSeparator())
-//		   .append("                      and t.stockNo = stockNo)                     ").append(System.lineSeparator());
-//		   .append("                      and volume <> 0)                             ").append(System.lineSeparator());
+		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator())
+		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
+	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
+		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220111' ").append(System.lineSeparator())
+		   .append("                      and t.stockNo = stockNo                      ").append(System.lineSeparator())
+		   .append("                      and sma5 is not null)                        ").append(System.lineSeparator());
 		
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("marketNo", marketNo);
@@ -202,6 +202,63 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("sma240", sma240);
 		
 		logger.info("updateSma sql: {}, paramMap: {}", sql, paramMap);
+		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.debug("status: {}", status);
+	}
+	
+	@Override
+	public void updateForeignInvestors(String stockNo, Timestamp openDt, int foreignInvestors) throws Exception {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
+		   .append("   set foreignInvestors = :foreignInvestors             ").append(System.lineSeparator())
+		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
+		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("stockNo", stockNo);
+		paramMap.put("openDt", openDt);
+		paramMap.put("foreignInvestors", foreignInvestors);
+		
+		logger.info("updateForeignInvestors sql: {}, paramMap: {}", sql, paramMap);
+		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.debug("status: {}", status);
+	}
+	
+	@Override
+	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
+		   .append("   set investmentTrust = :investmentTrust               ").append(System.lineSeparator())
+		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
+		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("stockNo", stockNo);
+		paramMap.put("openDt", openDt);
+		paramMap.put("investmentTrust", investmentTrust);
+		
+		logger.info("updateInvestmentTrust sql: {}, paramMap: {}", sql, paramMap);
+		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.debug("status: {}", status);
+	}
+	
+	@Override
+	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
+		   .append("   set dealer = :dealer                                 ").append(System.lineSeparator())
+		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
+		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("stockNo", stockNo);
+		paramMap.put("openDt", openDt);
+		paramMap.put("dealer", dealer);
+		
+		logger.info("updateDealer sql: {}, paramMap: {}", sql, paramMap);
 		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
