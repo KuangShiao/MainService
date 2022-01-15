@@ -14,5 +14,10 @@ public class UserServiceImpl implements UserService {
 	public boolean verifyUser(String acc, String pwd) throws Exception {
 		return userDao.verifyUser(acc, pwd);
 	}
+	
+	@Override
+	public boolean register(String acc, String pwd, String name) throws Exception {
+		return userDao.register(acc, pwd, name);
+	}
 
 }
