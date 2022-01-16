@@ -23,4 +23,6 @@ public interface StockService {
 	
 	public void updateBuyAndSell(DateTime openDt) throws Exception;
 
+	public List<StockInfo> findStockByTypeNo(String typeNo) throws Exception;
+
 }

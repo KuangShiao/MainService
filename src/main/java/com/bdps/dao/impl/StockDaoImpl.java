@@ -27,7 +27,7 @@ public class StockDaoImpl implements StockDao {
 	@Override
 	public void saveStockBasis(String stockNo, String stockName, String listingDate, String marketNo, String industryNo) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("insert into tblStockBasis (stockNo, stockName, listingDate, marketNo, industryNo)              ").append(System.lineSeparator())
 		   .append(" values (:stockNo, :stockName, to_date(:listingDate, 'YYYY/MM/DD'), :marketNo, :industryNo)    ").append(System.lineSeparator());
 		
@@ -39,20 +39,20 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("industryNo", industryNo);
 		
 		logger.info("saveStockBasis sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
 	public List<TblStockBasis> findStockBasisByMarketNo(String marketNo) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("select stockNo, stockName, listingDate, marketNo, industryNo       ").append(System.lineSeparator())
 		   .append("  from tblStockBasis t                                             ").append(System.lineSeparator())
 		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator())
 		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
 	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
-		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220111' ").append(System.lineSeparator())
+		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220114' ").append(System.lineSeparator())
 		   .append("                      and t.stockNo = stockNo                      ").append(System.lineSeparator())
 		   .append("                      and sma5 is not null)                        ").append(System.lineSeparator());
 		
@@ -60,7 +60,7 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("marketNo", marketNo);
 		
 		logger.info("findStockBasisByMarketNo sql: {}, paramMap: {}", sql, paramMap);
-		List<TblStockBasis> list = namedParameterJdbcTemplate.query(sql.toString(), paramMap, new BeanPropertyRowMapper<>(TblStockBasis.class));
+		List<TblStockBasis> list = this.namedParameterJdbcTemplate.query(sql.toString(), paramMap, new BeanPropertyRowMapper<>(TblStockBasis.class));
 		logger.info("Result size: {}", list.size());
 		
 		return list;
@@ -69,7 +69,7 @@ public class StockDaoImpl implements StockDao {
 	@Override
 	public void saveStockPrice(String stockNo, Timestamp openDt, double closePrice, double highPrice, double openPrice, double lowPrice, int volume) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("merge into tblStockPrice a                                                                                                                                                 ").append(System.lineSeparator())
 		   .append("using ( select :stockNo as stockNo, :openDt as openDt from dual ) b                                                                                                        ").append(System.lineSeparator())
            .append("   on ( a.stockNo = b.stockNo and a.openDt = b.openDt )                                                                                                                    ").append(System.lineSeparator())
@@ -89,14 +89,14 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("volume", volume);
 		
 		logger.info("saveStockPrice sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
 	public List<TblIndustryConfig> findAllIndustryConfig() throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("select industryNo,                    ").append(System.lineSeparator())
 		   .append("       industryName,                  ").append(System.lineSeparator())
 		   .append("	   createDate,                    ").append(System.lineSeparator())
@@ -104,7 +104,7 @@ public class StockDaoImpl implements StockDao {
 		   .append("  from tblIndustryConfig              ").append(System.lineSeparator());
 		
 		logger.info("findAllIndustryConfig sql: {}", sql);
-		List<TblIndustryConfig> list = namedParameterJdbcTemplate.query(sql.toString(), new HashMap<>(), new BeanPropertyRowMapper<>(TblIndustryConfig.class));
+		List<TblIndustryConfig> list = this.namedParameterJdbcTemplate.query(sql.toString(), new HashMap<>(), new BeanPropertyRowMapper<>(TblIndustryConfig.class));
 		logger.info("Result size: {}", list.size());
 		
 		return list;
@@ -113,7 +113,7 @@ public class StockDaoImpl implements StockDao {
 	@Override
 	public List<StockInfo> findStockInfo(String stockNoName, String industryNo) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("select nvl(t2.closePrice, 0) as closePrice,                                                            ").append(System.lineSeparator())
 		   .append("       t1.stockNo,                                                                                     ").append(System.lineSeparator())   
 		   .append("       t1.stockName,                                                                                   ").append(System.lineSeparator())   
@@ -145,7 +145,7 @@ public class StockDaoImpl implements StockDao {
 		}
 		
 		logger.info("findStockInfo sql: {}, paramMap: {}", sql, paramMap);
-		List<StockInfo> list = namedParameterJdbcTemplate.query(sql.toString(), paramMap, new BeanPropertyRowMapper<>(StockInfo.class));
+		List<StockInfo> list = this.namedParameterJdbcTemplate.query(sql.toString(), paramMap, new BeanPropertyRowMapper<>(StockInfo.class));
 		logger.debug("Result size: {}", list.size());
 		
 		return list;
@@ -154,7 +154,7 @@ public class StockDaoImpl implements StockDao {
 	@Override
 	public double findSma(String stockNo, Timestamp openDt, int sma) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("select nvl(sum(closePrice), 0) / :sma   ").append(System.lineSeparator())
 		   .append("  from (                                ").append(System.lineSeparator())
 		   .append("         select closePrice              ").append(System.lineSeparator())
@@ -171,7 +171,7 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("sma", sma);
 		
 		logger.info("findSma sql: {}, paramMap: {}", sql, paramMap);
-		double d = namedParameterJdbcTemplate.queryForObject(sql.toString(), paramMap, Double.class);
+		double d = this.namedParameterJdbcTemplate.queryForObject(sql.toString(), paramMap, Double.class);
 		logger.debug("Result: {}", d);
 		
 		return d;
@@ -180,7 +180,7 @@ public class StockDaoImpl implements StockDao {
 	@Override 
 	public void updateSma(String stockNo, Timestamp openDt, double sma5, double sma10, double sma20, double sma60, double sma120, double sma240) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice            ").append(System.lineSeparator())
 		   .append("   set sma5 = :sma5,            ").append(System.lineSeparator())
 		   .append("       sma10 = :sma10,          ").append(System.lineSeparator())
@@ -202,14 +202,14 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("sma240", sma240);
 		
 		logger.info("updateSma sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
 	public void updateForeignInvestors(String stockNo, Timestamp openDt, int foreignInvestors) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
 		   .append("   set foreignInvestors = :foreignInvestors             ").append(System.lineSeparator())
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
@@ -221,14 +221,14 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("foreignInvestors", foreignInvestors);
 		
 		logger.info("updateForeignInvestors sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
 	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
 		   .append("   set investmentTrust = :investmentTrust               ").append(System.lineSeparator())
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
@@ -240,14 +240,14 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("investmentTrust", investmentTrust);
 		
 		logger.info("updateInvestmentTrust sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
 	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception {
 		
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
 		   .append("   set dealer = :dealer                                 ").append(System.lineSeparator())
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
@@ -259,8 +259,65 @@ public class StockDaoImpl implements StockDao {
 		paramMap.put("dealer", dealer);
 		
 		logger.info("updateDealer sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 	}
 
+	@Override
+	public List<StockInfo> findStockByType01() throws Exception {
+		
+		StringBuilder sql = new StringBuilder(System.lineSeparator());
+		sql.append("with stockInfo as (                                                                                               ").append(System.lineSeparator())
+		   .append("    select nvl(t2.closePrice, 0) as closePrice,                                                                   ").append(System.lineSeparator())
+		   .append("           t1.stockNo,                                                                                            ").append(System.lineSeparator())
+		   .append("           t1.stockName,                                                                                          ").append(System.lineSeparator())
+		   .append("           t1.listingDate,                                                                                        ").append(System.lineSeparator())
+		   .append("           t1.marketNo,                                                                                           ").append(System.lineSeparator())
+		   .append("           t1.industryNo,                                                                                         ").append(System.lineSeparator())
+		   .append("           (select industryName from tblIndustryConfig where industryNo = t1.industryNo) as industryName          ").append(System.lineSeparator())
+		   .append("      from tblStockBasis t1                                                                                       ").append(System.lineSeparator())
+		   .append("    left join                                                                                                     ").append(System.lineSeparator())
+		   .append("           ( select a.stockNo, a.closePrice                                                                       ").append(System.lineSeparator())
+		   .append("               from ( select stockNo, openDt, closePrice                                                          ").append(System.lineSeparator())
+		   .append("                        from tblStockPrice ) a,                                                                   ").append(System.lineSeparator())
+		   .append("                    ( select stockNo, Max(openDt) as openDt                                                       ").append(System.lineSeparator())
+		   .append("                        from tblStockPrice                                                                        ").append(System.lineSeparator())
+		   .append("                      group by stockNo ) b                                                                        ").append(System.lineSeparator())
+		   .append("              where a.stockNo = b.stockNo                                                                         ").append(System.lineSeparator())
+		   .append("                and a.openDt = b.openDt ) t2                                                                      ").append(System.lineSeparator())
+		   .append("        on t1.stockNo = t2.stockNo                                                                                ").append(System.lineSeparator())
+		   .append(")                                                                                                                 ").append(System.lineSeparator())
+		   .append("                                                                                                                  ").append(System.lineSeparator())
+		   .append("select x.*                                                                                                        ").append(System.lineSeparator())
+		   .append("  from stockInfo x,                                                                                               ").append(System.lineSeparator())
+		   .append("       ( select stockNo                                                                                           ").append(System.lineSeparator())
+		   .append("           from ( select t1.stockNo,                                                                              ").append(System.lineSeparator())
+		   .append("                         t1.volume,                                                                               ").append(System.lineSeparator())
+		   .append("                         row_number() over (partition by t1.stockNo order by t1.openDt desc) as no                ").append(System.lineSeparator())
+		   .append("                    from ( select a.stockNo, a.openDt, a.closePrice, a.volume                                     ").append(System.lineSeparator())
+		   .append("                             from ( select stockNo, openDt, closePrice, volume,                                   ").append(System.lineSeparator())
+		   .append("                                           row_number() over (partition by stockNo order by openDt desc) as no    ").append(System.lineSeparator())
+		   .append("                                      from tblStockPrice ) a                                                      ").append(System.lineSeparator())
+		   .append("                            where a.no < 4 ) t1,                                        -- 每筆股票最近三天資料                            ").append(System.lineSeparator())
+		   .append("                         ( select a.stockNo, a.openDt, a.sma5, a.sma10, a.sma20, a.sma60                          ").append(System.lineSeparator())
+		   .append("                             from ( select stockNo, openDt, sma5, sma10, sma20, sma60,                            ").append(System.lineSeparator())
+		   .append("                                           row_number() over (partition by stockNo order by openDt desc) as no    ").append(System.lineSeparator())
+		   .append("                                      from tblStockPrice ) a                                                      ").append(System.lineSeparator())
+		   .append("                            where a.no < 4 ) t2                                         -- 每筆股票最近三天資料                            ").append(System.lineSeparator())
+		   .append("                   where t1.stockNo = t2.stockNo                                                                  ").append(System.lineSeparator())
+		   .append("                     and t1.openDt = t2.openDt                                                                    ").append(System.lineSeparator())
+		   .append("                     and t1.closePrice < t2.sma5                                                                  ").append(System.lineSeparator())
+		   .append("                     and t1.closePrice < t2.sma10                                                                 ").append(System.lineSeparator())
+		   .append("                     and t1.closePrice < t2.sma20                                                                 ").append(System.lineSeparator())
+		   .append("                     and t1.closePrice < t2.sma60 )                                                               ").append(System.lineSeparator())
+		   .append("          where no = 3                                                                  -- 取三天皆符合的股票                                 ").append(System.lineSeparator())
+		   .append("            and volume > 5000 * 1000 ) y                                                                          ").append(System.lineSeparator())
+		   .append(" where x.stockNo = y.stockNo                                                                                      ").append(System.lineSeparator());
+	
+		logger.info("findStockByType01 sql: {}", sql);
+		List<StockInfo> list = this.namedParameterJdbcTemplate.query(sql.toString(), new HashMap<>(), new BeanPropertyRowMapper<>(StockInfo.class));
+		logger.debug("Result size: {}", list.size());
+
+		return list;
+	}
 }

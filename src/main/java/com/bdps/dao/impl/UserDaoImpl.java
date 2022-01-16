@@ -46,7 +46,7 @@ public class UserDaoImpl implements UserDao {
 		paramMap.put("name", name);
 		
 		logger.info("register sql: {}, paramMap: {}", sql, paramMap);
-		int status = namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
 		logger.debug("status: {}", status);
 		
 		return status > 0;

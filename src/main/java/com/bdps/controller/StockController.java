@@ -149,6 +149,28 @@ public class StockController {
 		return vo;
 	}
 	
+	@RequestMapping(value = "/findStockByTypeNo", produces = "application/json", method = RequestMethod.POST)
+	public Vo findStockByTypeNo(@RequestBody String body) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== findStockByTypeNo ==========");
+		try {
+			JSONObject json = new JSONObject(body);
+			String typeNo = json.optString("typeNo", "");
+			
+			List<StockInfo> list = stockService.findStockByTypeNo(typeNo);
+			vo.setCheck(true);
+			vo.setData(list);
+		} catch (Exception e) {
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("E]========== findStockByTypeNo ==========");
+
+		return vo;
+	}
+	
 	@RequestMapping(value = "/updateBuyAndSell", produces = "application/json", method = RequestMethod.GET)
 	public Vo updateBuyAndSell(@RequestParam("dt") String dt) {
 

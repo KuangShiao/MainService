@@ -28,5 +28,7 @@ public interface StockDao {
 	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception;
 	
 	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception;
+	
+	public List<StockInfo> findStockByType01() throws Exception;
 
 }

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -343,7 +344,18 @@ public class StockServiceImpl implements StockService {
         	}
         }
         
-        
+	}
+	
+	@Override
+	public List<StockInfo> findStockByTypeNo(String typeNo) throws Exception {
+		
+		switch (typeNo) {
+			case "type_01":
+				return stockDao.findStockByType01();
+			default:
+				logger.warn("can't find typeNo: {}", typeNo);
+				return new ArrayList<>();
+		}
 	}
 
 }
