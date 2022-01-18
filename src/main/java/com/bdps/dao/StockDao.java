@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockBasis;
+import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
 
 public interface StockDao {
@@ -23,11 +24,11 @@ public interface StockDao {
 	
 	public void updateSma(String stockNo, Timestamp openDt, double sma5, double sma10, double sma20, double sma60, double sma120, double sma240) throws Exception;
 	
-	public void updateForeignInvestors(String stockNo, Timestamp openDt, int foreignInvestors) throws Exception;
+	public void updateForeignInvestors(List<TblStockPrice> list) throws Exception;
 	
-	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception;
+	public void updateInvestmentTrust(List<TblStockPrice> list) throws Exception;
 	
-	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception;
+	public void updateDealer(List<TblStockPrice> list) throws Exception;
 	
 	public List<StockInfo> findStockByType01() throws Exception;
 

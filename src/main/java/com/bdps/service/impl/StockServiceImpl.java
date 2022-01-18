@@ -243,16 +243,21 @@ public class StockServiceImpl implements StockService {
         	}
         	i++;
         }
-        
-        for (TblStockPrice t: list) {
-        	try {
-        		stockDao.updateForeignInvestors(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getForeignInvestors());	
-        	} catch (Exception e) {
-        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
-        	}
-        	
-        }
-        
+//        
+//        for (TblStockPrice t: list) {
+//        	try {
+//        		stockDao.updateForeignInvestors(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getForeignInvestors());	
+//        	} catch (Exception e) {
+//        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
+//        	}
+//        	
+//        }
+        list.stream().forEach(s -> s.setOpenDt(new Timestamp(openDt.getMillis())));
+     	try {
+    		stockDao.updateForeignInvestors(list);	
+    	} catch (Exception e) {
+    		logger.error("occur error: {}", e);
+    	}
         
         //[投信]
 		list = new ArrayList<>();
@@ -283,13 +288,12 @@ public class StockServiceImpl implements StockService {
         	i++;
         }
         
-        for (TblStockPrice t: list) {
-        	try {
-        		stockDao.updateInvestmentTrust(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getInvestmentTrust());	
-        	} catch (Exception e) {
-        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
-        	}
-        }
+        list.stream().forEach(s -> s.setOpenDt(new Timestamp(openDt.getMillis())));
+    	try {
+    		stockDao.updateInvestmentTrust(list);	
+    	} catch (Exception e) {
+    		logger.error("occur error: {}", e);
+    	}
         
         // [自營商]
 		list = new ArrayList<>();
@@ -336,13 +340,12 @@ public class StockServiceImpl implements StockService {
         	i++;
         }
         
-        for (TblStockPrice t: list) {
-        	try {
-        		stockDao.updateDealer(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getDealer());	
-        	} catch (Exception e) {
-        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
-        	}
-        }
+        list.stream().forEach(s -> s.setOpenDt(new Timestamp(openDt.getMillis())));
+    	try {
+    		stockDao.updateDealer(list);	
+    	} catch (Exception e) {
+    		logger.error("occur error: {}", e);
+    	}
         
 	}
 	

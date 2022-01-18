@@ -1,6 +1,8 @@
 package com.bdps.controller;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +16,8 @@ import com.bdps.util.Vo;
 
 @RestController
 public class MainController {
+
+	private static Logger logger = LoggerFactory.getLogger(MainController.class);
 
 	@Autowired
 	private UserService userSerivce;
@@ -29,6 +33,7 @@ public class MainController {
 		Vo vo = new Vo();
 
 		try {
+			logger.info("--- verifyUser ---");
 			JSONObject json = new JSONObject(body);
 			String acc = json.optString("acc", "");
 			String pwd = json.optString("pwd", "");
@@ -40,6 +45,7 @@ public class MainController {
 		} catch (Exception e) {
 			vo.setCheck(false);
 			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+			logger.error("verifyUser error: {}", ExceptionHandler.exceptionAsString(e));
 		}
 
 		return vo;

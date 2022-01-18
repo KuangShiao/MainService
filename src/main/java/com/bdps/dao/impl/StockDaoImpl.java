@@ -1,6 +1,7 @@
 package com.bdps.dao.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
 import com.bdps.dao.StockDao;
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockBasis;
+import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
 
 public class StockDaoImpl implements StockDao {
@@ -52,8 +56,8 @@ public class StockDaoImpl implements StockDao {
 		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator())
 		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
 	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
-		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220114' ").append(System.lineSeparator())
-		   .append("                      and t.stockNo = stockNo                      ").append(System.lineSeparator())
+		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220118' ").append(System.lineSeparator())
+		   .append("                      and t.stockNo = stockNo                     ").append(System.lineSeparator())
 		   .append("                      and sma5 is not null)                        ").append(System.lineSeparator());
 		
 		Map<String, Object> paramMap = new HashMap<>();
@@ -207,7 +211,7 @@ public class StockDaoImpl implements StockDao {
 	}
 	
 	@Override
-	public void updateForeignInvestors(String stockNo, Timestamp openDt, int foreignInvestors) throws Exception {
+	public void updateForeignInvestors(List<TblStockPrice> list) throws Exception {
 		
 		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
@@ -215,18 +219,18 @@ public class StockDaoImpl implements StockDao {
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
 		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
 		
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("stockNo", stockNo);
-		paramMap.put("openDt", openDt);
-		paramMap.put("foreignInvestors", foreignInvestors);
+//		Map<String, Object> paramMap = new HashMap<>();
+//		paramMap.put("stockNo", stockNo);
+//		paramMap.put("openDt", openDt);
+//		paramMap.put("foreignInvestors", foreignInvestors);
 		
-		logger.info("updateForeignInvestors sql: {}, paramMap: {}", sql, paramMap);
-		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.info("updateForeignInvestors sql: {}, list.size: {}", sql, list.size());
+		int[] status = this.namedParameterJdbcTemplate.batchUpdate(sql.toString(), SqlParameterSourceUtils.createBatch(list.toArray()));
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
-	public void updateInvestmentTrust(String stockNo, Timestamp openDt, int investmentTrust) throws Exception {
+	public void updateInvestmentTrust(List<TblStockPrice> list) throws Exception {
 		
 		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
@@ -234,18 +238,18 @@ public class StockDaoImpl implements StockDao {
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
 		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
 		
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("stockNo", stockNo);
-		paramMap.put("openDt", openDt);
-		paramMap.put("investmentTrust", investmentTrust);
+//		Map<String, Object> paramMap = new HashMap<>();
+//		paramMap.put("stockNo", stockNo);
+//		paramMap.put("openDt", openDt);
+//		paramMap.put("investmentTrust", investmentTrust);
 		
-		logger.info("updateInvestmentTrust sql: {}, paramMap: {}", sql, paramMap);
-		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.info("updateInvestmentTrust sql: {}, list.size: {}", sql, list.size());
+		int[] status = this.namedParameterJdbcTemplate.batchUpdate(sql.toString(),  SqlParameterSourceUtils.createBatch(list.toArray()));
 		logger.debug("status: {}", status);
 	}
 	
 	@Override
-	public void updateDealer(String stockNo, Timestamp openDt, int dealer) throws Exception {
+	public void updateDealer(List<TblStockPrice> list) throws Exception {
 		
 		StringBuilder sql = new StringBuilder(System.lineSeparator());
 		sql.append("update tblStockPrice                                    ").append(System.lineSeparator())
@@ -253,13 +257,13 @@ public class StockDaoImpl implements StockDao {
 		   .append(" where stockNo = :stockNo                               ").append(System.lineSeparator())
 		   .append("   and openDt = :openDt                                 ").append(System.lineSeparator());
 		
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("stockNo", stockNo);
-		paramMap.put("openDt", openDt);
-		paramMap.put("dealer", dealer);
+//		Map<String, Object> paramMap = new HashMap<>();
+//		paramMap.put("stockNo", stockNo);
+//		paramMap.put("openDt", openDt);
+//		paramMap.put("dealer", dealer);
 		
-		logger.info("updateDealer sql: {}, paramMap: {}", sql, paramMap);
-		int status = this.namedParameterJdbcTemplate.update(sql.toString(), paramMap);
+		logger.info("updateDealer sql: {}, list.size: {}", sql, list.size());
+		int[] status = this.namedParameterJdbcTemplate.batchUpdate(sql.toString(),  SqlParameterSourceUtils.createBatch(list.toArray()));
 		logger.debug("status: {}", status);
 	}
 
