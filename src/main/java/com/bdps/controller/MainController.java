@@ -33,7 +33,6 @@ public class MainController {
 		Vo vo = new Vo();
 
 		try {
-			logger.info("--- verifyUser ---");
 			JSONObject json = new JSONObject(body);
 			String acc = json.optString("acc", "");
 			String pwd = json.optString("pwd", "");
