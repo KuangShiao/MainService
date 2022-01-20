@@ -33,7 +33,7 @@ public class CORSFilter implements Filter {
 		
 		// 解決以上錯誤，跨來源資料共用(CORS)錯誤，允許針對不同來源請求
 		
-		logger.info(" ========== CORSFilter doFilter ========== ");
+		logger.debug(" ========== CORSFilter doFilter ========== ");
 		
 		HttpServletResponse response = (HttpServletResponse) rsp;
 		response.setHeader("Access-Control-Allow-Origin", "*");
