@@ -2,8 +2,10 @@ package com.bdps.service.impl;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +19,12 @@ public class HttpServiceImpl implements HttpService {
 	@Override
 	public String httpGet(String url) throws Exception {
 		
-        DefaultHttpClient demo = new DefaultHttpClient();
-        demo.getParams().setParameter("http.protocol.content-charset", "UTF-8");
-
-        HttpGet httpGet = new HttpGet(url);
-        HttpResponse response = demo.execute(httpGet);
+		URIBuilder builder = new URIBuilder(url);
+		builder.setParameter("http.protocol.content-charset", "UTF-8");		
+		HttpGet httpGet = new HttpGet(builder.build());
+		
+		HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpResponse response = httpClient.execute(httpGet);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
         	return EntityUtils.toString(response.getEntity());
         } else {

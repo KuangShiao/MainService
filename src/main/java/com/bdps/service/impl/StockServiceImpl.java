@@ -1,7 +1,6 @@
 package com.bdps.service.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -13,16 +12,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -359,6 +351,11 @@ public class StockServiceImpl implements StockService {
 				logger.warn("can't find typeNo: {}", typeNo);
 				return new ArrayList<>();
 		}
+	}
+	
+	@Override
+	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception {
+		return stockDao.findStockPriceByStockNo(stockNo);
 	}
 
 }

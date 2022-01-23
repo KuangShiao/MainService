@@ -1,6 +1,5 @@
 package com.bdps.controller;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bdps.entity.TblIndustryConfig;
+import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
 import com.bdps.service.StockService;
 import com.bdps.util.ExceptionHandler;
@@ -35,11 +35,7 @@ public class StockController {
 
 		Vo vo = new Vo();
 
-		try {
-//			JSONObject json = new JSONObject(body);
-//			String acc = json.optString("acc", "");
-//			String pwd = json.optString("pwd", "");
-			
+		try {			
 			stockService.printStockPrice();
 			vo.setCheck(true);
 		} catch (Exception e) {
@@ -105,6 +101,33 @@ public class StockController {
 		return vo;
 	}
 	
+	@RequestMapping(value = "/updateBuyAndSell", produces = "application/json", method = RequestMethod.GET)
+	public Vo updateBuyAndSell(@RequestParam("dt") String dt) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== updateBuyAndSell ==========");
+		try {  
+
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyyMMdd");
+			DateTime openDt = dtf.parseDateTime(dt);
+			openDt = openDt.plusHours(15);
+			stockService.updateBuyAndSell(openDt);
+			
+			DateTimeFormatter dtfOut  = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
+			logger.info("openDt: {}", dtfOut.print(openDt));
+
+			vo.setCheck(true);
+			vo.setData(dtfOut.print(openDt));
+		} catch (Exception e) {
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("[E]========== updateBuyAndSell ==========");
+		
+		return vo;
+	}
+	
 	@RequestMapping(value = "/findAllIndustryConfig", produces = "application/json", method = RequestMethod.POST)
 	public Vo findAllIndustryConfig(@RequestBody String body) {
 
@@ -112,7 +135,7 @@ public class StockController {
 
 		logger.info("[S]========== findAllIndustryConfig ==========");
 		try {
-			JSONObject json = new JSONObject(body);
+//			JSONObject json = new JSONObject(body);
 			
 			List<TblIndustryConfig> list = stockService.findAllIndustryConfig();
 			vo.setCheck(true);
@@ -171,30 +194,26 @@ public class StockController {
 		return vo;
 	}
 	
-	@RequestMapping(value = "/updateBuyAndSell", produces = "application/json", method = RequestMethod.GET)
-	public Vo updateBuyAndSell(@RequestParam("dt") String dt) {
+	@RequestMapping(value = "/findStockPriceByStockNo", produces = "application/json", method = RequestMethod.POST)
+	public Vo findStockDetail(@RequestBody String body) {
 
 		Vo vo = new Vo();
 
-		logger.info("[S]========== updateBuyAndSell ==========");
-		try {  
-
-			DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyyMMdd");
-			DateTime openDt = dtf.parseDateTime(dt);
-			openDt = openDt.plusHours(15);
-			stockService.updateBuyAndSell(openDt);
+		logger.info("[S]========== findStockPriceByStockNo ==========");
+		try {
+			JSONObject json = new JSONObject(body);
+			String stockNo = json.optString("stockNo", "");
 			
-			DateTimeFormatter dtfOut  = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
-			logger.info("openDt: {}", dtfOut.print(openDt));
-
+			List<TblStockPrice> list = stockService.findStockPriceByStockNo(stockNo);
 			vo.setCheck(true);
-			vo.setData(dtfOut.print(openDt));
+			vo.setData(list);
 		} catch (Exception e) {
+			logger.error("findStockPriceByStockNo error: {}", e);
 			vo.setCheck(false);
 			vo.setMsg(ExceptionHandler.exceptionAsString(e));
 		}
-		logger.info("[E]========== updateBuyAndSell ==========");
-		
+		logger.info("E]========== findStockPriceByStockNo ==========");
+
 		return vo;
 	}
 

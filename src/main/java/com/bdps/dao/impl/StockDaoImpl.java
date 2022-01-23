@@ -1,7 +1,6 @@
 package com.bdps.dao.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
@@ -56,7 +54,7 @@ public class StockDaoImpl implements StockDao {
 		   .append(" where marketNo = :marketNo                                        ").append(System.lineSeparator())
 		   .append("   and not exists (select *                                        ").append(System.lineSeparator())
 	       .append("                     from tblStockPrice                            ").append(System.lineSeparator())
-		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220120' ").append(System.lineSeparator())
+		   .append("                    where to_char(opendt, 'YYYYMMDD') = '20220121' ").append(System.lineSeparator())
 		   .append("                      and t.stockNo = stockNo                     ").append(System.lineSeparator())
 		   .append("                      and sma5 is not null)                        ").append(System.lineSeparator());
 		
@@ -309,4 +307,43 @@ public class StockDaoImpl implements StockDao {
 
 		return list;
 	}
+	
+	@Override
+	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception {
+	
+		StringBuilder sql = new StringBuilder();
+		sql.append("select stockNo,                                       ").append(System.lineSeparator())
+		   .append("       openDt,                                        ").append(System.lineSeparator())
+		   .append("       closePrice,                                    ").append(System.lineSeparator())
+		   .append("       highPrice,                                     ").append(System.lineSeparator())
+		   .append("       openPrice,                                     ").append(System.lineSeparator())
+		   .append("       lowPrice,                                      ").append(System.lineSeparator())
+		   .append("       volume,                                        ").append(System.lineSeparator())
+		   .append("       sma5,                                          ").append(System.lineSeparator())
+		   .append("       sma10,                                         ").append(System.lineSeparator())
+		   .append("       sma20,                                         ").append(System.lineSeparator())
+		   .append("       sma60,                                         ").append(System.lineSeparator())
+		   .append("       sma120,                                        ").append(System.lineSeparator())
+		   .append("       sma240,                                        ").append(System.lineSeparator())
+		   .append("       nvl(foreignInvestors, 0) as foreignInvestors,  ").append(System.lineSeparator())
+		   .append("       nvl(investmentTrust, 0) as investmentTrust,    ").append(System.lineSeparator())
+		   .append("       nvl(dealer, 0) as dealer,                      ").append(System.lineSeparator())
+		   .append("       createDate,                                    ").append(System.lineSeparator())
+		   .append("       modifyDate                                     ").append(System.lineSeparator())
+		   .append("  from tblStockPrice                                  ").append(System.lineSeparator())
+		   .append(" where stockNo = :stockNo                             ").append(System.lineSeparator())
+		   .append("   and rownum <= :days                                ").append(System.lineSeparator()) 
+		   .append(" order by openDt desc                                 ").append(System.lineSeparator());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("stockNo", stockNo);
+		paramMap.put("days", 30);
+		
+		logger.info("findStockPriceByStockNo sql: {}, paramMap: {}", sql, paramMap);
+		List<TblStockPrice> list = this.namedParameterJdbcTemplate.query(sql.toString(), paramMap, new BeanPropertyRowMapper<>(TblStockPrice.class));
+		logger.debug("Result size: {}", list.size());
+		 
+		return list;
+	}
+	
 }

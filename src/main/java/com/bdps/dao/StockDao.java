@@ -32,4 +32,6 @@ public interface StockDao {
 	
 	public List<StockInfo> findStockByType01() throws Exception;
 
+	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception;
+
 }
