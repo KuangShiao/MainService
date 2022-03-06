@@ -7,6 +7,7 @@ import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockBasis;
 import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
+import com.bdps.module.StockInventory;
 
 public interface StockDao {
 
@@ -30,8 +31,19 @@ public interface StockDao {
 	
 	public void updateDealer(List<TblStockPrice> list) throws Exception;
 	
-	public List<StockInfo> findStockByType01() throws Exception;
+	public List<StockInfo> findStackInfoByStockNo(List<String> stockNo) throws Exception;
+	public List<String> findStockNoByType01() throws Exception;
+	public List<String> findStockNoByType02() throws Exception;
+	public List<String> findStockNoByType03() throws Exception;
 
 	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception;
+
+	public void updateBuyAndSellByTxt(String stockNo, Timestamp openDt, String fv, String iv, String dv) throws Exception;
+
+	public List<StockInventory> stockInventoryQuery(String account) throws Exception;
+	
+	public boolean insertStockInventory(String account, String stockNo, int num, double stockPrice, int costPrice) throws Exception;
+	
+	public boolean insertStockTradeHistory(String account, String stockNo, String tradeType, int num, double stockPrice, int costPrice, int income) throws Exception;
 
 }

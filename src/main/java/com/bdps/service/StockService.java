@@ -7,6 +7,7 @@ import org.joda.time.DateTime;
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
+import com.bdps.module.StockInventory;
 
 public interface StockService {
 
@@ -27,5 +28,13 @@ public interface StockService {
 	public List<StockInfo> findStockByTypeNo(String typeNo) throws Exception;
 
 	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception;
+
+	public void updateBuyAndSellByTxt(DateTime openDt) throws Exception;
+
+	public List<StockInventory> stockInventoryQuery(String account) throws Exception;
+
+	public void orderStock(String account, double closePrice, String stockNo, int stockNum) throws Exception;
+	
+	public void spendCash(String account, String tradeType, int cost) throws Exception;
 
 }

@@ -24,12 +24,16 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bdps.dao.StockDao;
+import com.bdps.dao.UserDao;
+import com.bdps.entity.TblAccountBasis;
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockBasis;
 import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
+import com.bdps.module.StockInventory;
 import com.bdps.service.HttpService;
 import com.bdps.service.StockService;
 
@@ -39,6 +43,9 @@ public class StockServiceImpl implements StockService {
 
 	@Autowired
 	private StockDao stockDao;
+	
+	@Autowired
+	private UserDao userDao;
 
 	@Autowired
 	private HttpService httpService;
@@ -185,7 +192,8 @@ public class StockServiceImpl implements StockService {
 					double sma10 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 10);
 					double sma20 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 20);
 					double sma60 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 60);
-					stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, 0, 0);
+					double sma120 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 120);
+					stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, sma120, 0);
 				} catch (Exception e) {
 					logger.error("stockNo: {}, occur error: {}", stockBasis.getStockNo(), e.getMessage());
 					try {
@@ -193,7 +201,8 @@ public class StockServiceImpl implements StockService {
 						double sma10 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 10);
 						double sma20 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 20);
 						double sma60 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 60);
-						stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, 0, 0);
+						double sma120 = stockDao.findSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), 120);
+						stockDao.updateSma(stockBasis.getStockNo(), new Timestamp(openDt.getMillis()), sma5, sma10, sma20, sma60, sma120, 0);
 					} catch (Exception e1) {
 						
 					}
@@ -235,15 +244,7 @@ public class StockServiceImpl implements StockService {
         	}
         	i++;
         }
-//        
-//        for (TblStockPrice t: list) {
-//        	try {
-//        		stockDao.updateForeignInvestors(t.getStockNo(), new Timestamp(openDt.getMillis()), t.getForeignInvestors());	
-//        	} catch (Exception e) {
-//        		logger.error("stockNo: {}, occur error: {}", t.getStockNo(), e.getMessage());
-//        	}
-//        	
-//        }
+
         list.stream().forEach(s -> s.setOpenDt(new Timestamp(openDt.getMillis())));
      	try {
     		stockDao.updateForeignInvestors(list);	
@@ -344,18 +345,103 @@ public class StockServiceImpl implements StockService {
 	@Override
 	public List<StockInfo> findStockByTypeNo(String typeNo) throws Exception {
 		
+		List<String> stockNo = null;
+
 		switch (typeNo) {
 			case "type_01":
-				return stockDao.findStockByType01();
+				 stockNo = stockDao.findStockNoByType01();
+				 break;
+			case "type_02":
+				stockNo = stockDao.findStockNoByType02();
+				break;
+			case "type_03":
+				stockNo = stockDao.findStockNoByType03();
+				break;
 			default:
 				logger.warn("can't find typeNo: {}", typeNo);
 				return new ArrayList<>();
 		}
+		
+		return stockDao.findStackInfoByStockNo(stockNo);
 	}
 	
 	@Override
 	public List<TblStockPrice> findStockPriceByStockNo(String stockNo) throws Exception {
 		return stockDao.findStockPriceByStockNo(stockNo);
+	}
+	
+	@Override
+	public void updateBuyAndSellByTxt(DateTime openDt) throws Exception {
+		String dt = "20220210";
+		InputStream is = getClass().getClassLoader().getResourceAsStream("stock/" + dt + ".txt");
+
+		String str = IOUtils.toString(is, StandardCharsets.UTF_8);
+		String[] rowData = str.split(System.lineSeparator());
+		for (String row : rowData) {
+			String[] data = row.split(",");
+			
+			String stockNo = data[0];
+			String fv = data[1];
+			String iv = data[2];
+			String dv = data[3];
+			
+//			System.out.println(stockNo + "@" + fv + "@" + iv + "@" + dv);
+			stockDao.updateBuyAndSellByTxt(stockNo, new Timestamp(openDt.getMillis()), fv, iv, dv);
+		}
+	}
+	
+	@Override
+	public List<StockInventory> stockInventoryQuery(String account) throws Exception {
+		return stockDao.stockInventoryQuery(account);
+	}
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void orderStock(String account, double closePrice, String stockNo, int stockNum) throws Exception {
+		
+		// 扣 accountBasis.cash
+		// 寫入 cash 異動紀錄 tblCashHistory
+		int handlingFee = (int) (Math.floor(closePrice * 1000 * stockNum * 0.001425) < 20 ? 20 : 
+								Math.floor(closePrice * 1000 * stockNum * 0.001425));
+		int costPrice = (int) ((closePrice * 1000 * stockNum) + handlingFee);
+		this.spendCash(account, "下單股票", costPrice);
+		
+		// 寫入 tblStockInventory
+		boolean updateStatus = stockDao.insertStockInventory(account, stockNo, stockNum, closePrice, costPrice);
+		if (!updateStatus) {
+			throw new Exception("更新庫存股票失敗");
+		}
+		// 寫入 紀錄 tblStockTradeHistory
+		updateStatus = stockDao.insertStockTradeHistory(account, stockNo, "下單股票", stockNum, closePrice, costPrice, 0);
+		if (!updateStatus) {
+			throw new Exception("更新股票交易紀錄");
+		}		
+	}
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void spendCash(String account, String tradeType, int costPrice) throws Exception {
+		
+		TblAccountBasis tblAccBasis = userDao.getAccBasis(account);
+		int cash = (tblAccBasis != null) ? tblAccBasis.getCash() : 0;
+		if (cash < costPrice) {
+			logger.error("cash 不足");
+			logger.error("cash: {}, costPrice: {}", cash, costPrice);
+			throw new Exception("cash 不足");
+		}
+		
+		int remainingCash = cash - costPrice;
+		
+		logger.info("cash: {}, costPrice: {}, remainingCash: {}", cash, costPrice, remainingCash);
+		boolean updateStatus = userDao.updateAccBasisCash(account, remainingCash);
+		if (!updateStatus) {
+			throw new Exception("更新點數失敗");
+		}
+		
+		updateStatus = userDao.insertCashHistory(account, tradeType, costPrice, remainingCash);
+		if (!updateStatus) {
+			throw new Exception("更新點數失敗");
+		}
 	}
 
 }

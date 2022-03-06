@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bdps.entity.TblIndustryConfig;
 import com.bdps.entity.TblStockPrice;
 import com.bdps.module.StockInfo;
+import com.bdps.module.StockInventory;
 import com.bdps.service.StockService;
 import com.bdps.util.ExceptionHandler;
 import com.bdps.util.Vo;
@@ -186,8 +187,9 @@ public class StockController {
 			vo.setCheck(true);
 			vo.setData(list);
 		} catch (Exception e) {
+			logger.error(ExceptionHandler.exceptionAsString(e));
 			vo.setCheck(false);
-			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+			vo.setMsg("發生未預期的錯誤");
 		}
 		logger.info("E]========== findStockByTypeNo ==========");
 
@@ -213,6 +215,80 @@ public class StockController {
 			vo.setMsg(ExceptionHandler.exceptionAsString(e));
 		}
 		logger.info("E]========== findStockPriceByStockNo ==========");
+
+		return vo;
+	}
+	
+	@RequestMapping(value = "/updateBuyAndSellByTxt", produces = "application/json", method = RequestMethod.GET)
+	public Vo updateBuyAndSellByTxt(@RequestParam("dt") String dt) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== updateBuyAndSellByTxt ==========");
+		try {  
+
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyyMMdd");
+			DateTime openDt = dtf.parseDateTime(dt);
+			openDt = openDt.plusHours(15);
+			stockService.updateBuyAndSellByTxt(openDt);
+			
+			DateTimeFormatter dtfOut  = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
+			logger.info("openDt: {}", dtfOut.print(openDt));
+
+			vo.setCheck(true);
+			vo.setData(dtfOut.print(openDt));
+		} catch (Exception e) {
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("[E]========== updateBuyAndSellByTxt ==========");
+		
+		return vo;
+	}
+	
+	@RequestMapping(value = "/stockInventoryQuery", produces = "application/json", method = RequestMethod.POST)
+	public Vo stockInventoryQuery(@RequestBody String body) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== stockInventoryQuery ==========");
+		try {
+			JSONObject json = new JSONObject(body);
+			String account = json.optString("account", "");
+			
+			List<StockInventory> list = stockService.stockInventoryQuery(account);
+			vo.setCheck(true);
+			vo.setData(list);
+		} catch (Exception e) {
+			logger.error("stockInventoryQuery error: {}", e);
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("E]========== stockInventoryQuery ==========");
+
+		return vo;
+	}
+	
+	@RequestMapping(value = "/orderStock", produces = "application/json", method = RequestMethod.POST)
+	public Vo orderStock(@RequestBody String body) {
+
+		Vo vo = new Vo();
+
+		logger.info("[S]========== orderStock ==========");
+		try {
+			JSONObject json = new JSONObject(body);
+			String account = json.optString("account", "");
+			double closePrice = json.optDouble("closePrice");
+			String stockNo = json.optString("stockNo", "");
+			int stockNum = json.optInt("stockNum");
+			stockService.orderStock(account, closePrice, stockNo, stockNum);
+			vo.setCheck(true);
+		} catch (Exception e) {
+			logger.error("orderStock error: {}", e);
+			vo.setCheck(false);
+			vo.setMsg(ExceptionHandler.exceptionAsString(e));
+		}
+		logger.info("E]========== orderStock ==========");
 
 		return vo;
 	}
